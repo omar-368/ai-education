@@ -17,7 +17,7 @@ export async function askOpenRouter(system: string, user: unknown) {
       "X-OpenRouter-Title": "AI Education",
     },
     body: JSON.stringify({
-      model: process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini",
+      model: process.env.OPENROUTER_MODEL || "openrouter/free",
       temperature: 0.55,
       response_format: { type: "json_object" },
       messages: [

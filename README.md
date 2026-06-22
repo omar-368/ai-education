@@ -13,7 +13,7 @@ Add your OpenRouter credentials to `.env.local`:
 
 ```env
 OPENROUTER_API_KEY=sk-or-v1-your-real-key
-OPENROUTER_MODEL=openai/gpt-4o-mini
+OPENROUTER_MODEL=openrouter/free
 ```
 
 Never prefix the API key with `VITE_`. The browser calls serverless routes under `/api`; the key remains on the server.
