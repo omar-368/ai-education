@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { localStorageAdapter } from "./lib/storage/localStorageAdapter";
+import { subjectGroups } from "./subjects";
 import type { GradeResponse, PlayerProfile, Question, QuizSettings } from "./types";
 
 function GeneratingLabel({ text }: { text: string }) {
@@ -31,28 +32,6 @@ function GeneratingLabel({ text }: { text: string }) {
     </span>
   );
 }
-
-const subjects = [
-  "General Veterinary Medicine",
-  "Equine Medicine",
-  "Farm Animal Medicine",
-  "Small Animal Medicine",
-  "Pathology",
-  "Parasitology",
-  "Pharmacology",
-  "Veterinary Anatomy",
-  "Physiology",
-  "Theriogenology / Reproduction",
-  "Wildlife Medicine",
-  "Chemistry",
-  "Biology",
-  "History",
-  "Anatomy",
-  "Food Safety",
-  "Public Health",
-  "General Knowledge",
-  "Custom Subject",
-];
 
 const achievements = [
   { id: "first-step", label: "First Step", detail: "Answer your first question", icon: "✦" },
@@ -368,6 +347,7 @@ export default function App() {
 
     try {
       const grade = await postJson<GradeResponse>("/api/grade-answer", {
+        subject: selectedSubject,
         question,
         userAnswer: answer,
       });
@@ -458,8 +438,14 @@ export default function App() {
                   updateSettings({ subject: event.target.value })
                 }
               >
-                {subjects.map((subject) => (
-                  <option key={subject}>{subject}</option>
+                {subjectGroups.map((group) => (
+                  <optgroup key={group.label} label={group.label}>
+                    {group.subjects.map((subject) => (
+                      <option key={subject} value={subject}>
+                        {subject}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </div>

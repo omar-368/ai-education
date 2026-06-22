@@ -484,6 +484,16 @@ textarea {
   background: #fbfbfd;
 }
 
+select optgroup {
+  color: #5f5877;
+  font-weight: 700;
+}
+
+select option {
+  color: #2b283d;
+  font-weight: 400;
+}
+
 select:focus,
 input:focus,
 textarea:focus {

@@ -1,4 +1,5 @@
 import type { PlayerProfile, QuizSettings } from "../../types";
+import { subjects } from "../../subjects";
 
 const SETTINGS_KEY = "ai-education-quiz-settings";
 const PROFILE_KEY = "ai-education-player-profile";
@@ -37,9 +38,13 @@ export const localStorageAdapter = {
         parsed.subject === "Veterinary Medicine"
           ? "General Veterinary Medicine"
           : parsed.subject;
+      const validSubject =
+        typeof savedSubject === "string" &&
+        subjects.includes(savedSubject as (typeof subjects)[number])
+          ? savedSubject
+          : defaultSettings.subject;
       return {
-        subject:
-          typeof savedSubject === "string" ? savedSubject : defaultSettings.subject,
+        subject: validSubject,
         customSubject:
           typeof parsed.customSubject === "string" ? parsed.customSubject : "",
         questionType:

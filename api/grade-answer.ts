@@ -8,6 +8,8 @@ import {
 
 const systemPrompt = `You are a strict but constructive university examiner.
 Grade the student's short answer against the question and ideal answer.
+The selected subject is authoritative context. Evaluate terminology, scope, and reasoning within that exact subject.
+Do not reinterpret the question as belonging to a broader or different subject.
 Reward correct reasoning even if wording differs. Mark partial when core knowledge is present but important
 elements are missing. Keep feedback concise and educational.
 Return ONLY valid JSON:
@@ -24,10 +26,11 @@ Return ONLY valid JSON:
 
 export default async function handler(request: ApiRequest, response: ApiResponse) {
   if (!prepareApiRequest(request, response)) return;
+  const subject = cleanText(request.body?.subject, 100);
   const sourceQuestion = request.body?.question;
   const userAnswer = cleanText(request.body?.userAnswer, 4_000);
-  if (!sourceQuestion || typeof sourceQuestion !== "object" || !userAnswer) {
-    return response.status(400).json({ error: "A question and answer are required." });
+  if (!subject || !sourceQuestion || typeof sourceQuestion !== "object" || !userAnswer) {
+    return response.status(400).json({ error: "A subject, question, and answer are required." });
   }
   const questionInput = sourceQuestion as Record<string, unknown>;
   const question = {
@@ -40,7 +43,11 @@ export default async function handler(request: ApiRequest, response: ApiResponse
     return response.status(400).json({ error: "The question data is incomplete." });
   }
   try {
-    const result = await askOpenRouter(systemPrompt, { question, userAnswer });
+    const result = await askOpenRouter(systemPrompt, {
+      subject,
+      question,
+      userAnswer,
+    });
     const validResult = ["correct", "partial", "incorrect"].includes(result.result);
     const validScore = typeof result.score === "number" && result.score >= 0 && result.score <= 100;
     const requiredStrings = ["feedback", "idealAnswer", "explanation", "extraFact", "weakTopic"];
