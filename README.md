@@ -23,13 +23,15 @@ Never prefix the API key with `VITE_`. The browser calls serverless routes under
 Use Vercel development mode so both the Vite frontend and serverless API routes run:
 
 ```powershell
-npx vercel dev
+npm run dev:vercel
 ```
 
-## Build
+## Quality checks
 
 ```powershell
+npm run check
 npm run build
+npm audit
 ```
 
 ## Deploy
@@ -40,4 +42,4 @@ Add `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` in the Vercel project's environm
 npx vercel@latest deploy --prod
 ```
 
-The app saves only the user's selected subject and question type in local storage. No study material or account is required.
+The app stores quiz preferences and player progression in local storage. No study material or account is required.

@@ -5,15 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:vercel": "vercel dev",
+    "dev:vercel": "npx --yes vercel@latest dev",
     "build": "tsc -b && vite build",
+    "check": "tsc -b",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "^4.3.4",
-    "@vercel/node": "^5.1.16",
     "lucide-react": "^0.468.0",
-    "vite": "^6.0.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -21,7 +19,8 @@
     "@types/node": "^22.10.5",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.7.0",
     "typescript": "~5.7.2",
-    "vercel": "^39.2.4"
+    "vite": "^6.4.3"
   }
 }

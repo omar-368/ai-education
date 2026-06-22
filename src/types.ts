@@ -8,6 +8,16 @@ export interface QuizSettings {
   questionType: QuestionType;
 }
 
+export interface PlayerProfile {
+  totalXp: number;
+  totalAnswered: number;
+  totalCorrect: number;
+  bestStreak: number;
+  dailyAnswered: number;
+  dailyDate: string;
+  achievements: string[];
+}
+
 export interface Question {
   id: string;
   questionType: QuestionType;
