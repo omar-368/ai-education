@@ -1,6 +1,12 @@
 export type QuestionType = "mcq" | "short_answer";
 export type AnswerResult = "correct" | "partial" | "incorrect";
 export type DifficultyLevel = "Foundation" | "Exam" | "Advanced" | "Expert";
+export type ExamSkill =
+  | "recall"
+  | "understanding"
+  | "application"
+  | "clinical reasoning"
+  | "analysis";
 
 export interface QuizSettings {
   subject: string;
@@ -24,13 +30,13 @@ export interface Question {
   question: string;
   topic: string;
   difficulty: DifficultyLevel;
-  options?: string[];
-  correctAnswer?: string;
+  options: string[];
+  correctAnswer: string;
   idealAnswer: string;
   explanation: string;
   extraFact: string;
   whyThisQuestion: string;
-  estimatedExamSkill: string;
+  estimatedExamSkill: ExamSkill;
 }
 
 export interface GradeResponse {
