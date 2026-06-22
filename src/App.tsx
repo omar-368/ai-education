@@ -18,15 +18,36 @@ import {
 import { localStorageAdapter } from "./lib/storage/localStorageAdapter";
 import type { GradeResponse, PlayerProfile, Question, QuizSettings } from "./types";
 
+function GeneratingLabel({ text }: { text: string }) {
+  return (
+    <span className="generating-label" role="status" aria-live="polite">
+      <Sparkles className="generating-sparkle" size={18} aria-hidden="true" />
+      <span>{text}</span>
+      <span className="thinking-dots" aria-hidden="true">
+        <i />
+        <i />
+        <i />
+      </span>
+    </span>
+  );
+}
+
 const subjects = [
-  "Veterinary Medicine",
+  "General Veterinary Medicine",
+  "Equine Medicine",
+  "Farm Animal Medicine",
+  "Small Animal Medicine",
+  "Pathology",
+  "Parasitology",
+  "Pharmacology",
+  "Veterinary Anatomy",
+  "Physiology",
+  "Theriogenology / Reproduction",
+  "Wildlife Medicine",
   "Chemistry",
   "Biology",
   "History",
   "Anatomy",
-  "Physiology",
-  "Pathology",
-  "Pharmacology",
   "Food Safety",
   "Public Health",
   "General Knowledge",
@@ -388,7 +409,10 @@ export default function App() {
 
       <section className="quiz-shell">
         {!question ? (
-          <div className="setup-card">
+          <div
+            className={`setup-card ${loading === "question" ? "is-generating" : ""}`}
+            aria-busy={loading === "question"}
+          >
             <div className="player-dashboard">
               <div className="player-rank">
                 <span><Crown size={22} /></span>
@@ -511,9 +535,7 @@ export default function App() {
               disabled={loading === "question"}
             >
               {loading === "question" ? (
-                <>
-                  <LoaderCircle className="spin" size={20} /> Creating question…
-                </>
+                <GeneratingLabel text="Creating your questions" />
               ) : (
                 <>
                   Start Quiz <ArrowRight size={20} />
@@ -542,7 +564,10 @@ export default function App() {
             </div>
           </div>
         ) : (
-          <div className="question-card">
+          <div
+            className={`question-card ${loading === "question" ? "is-generating" : ""}`}
+            aria-busy={loading === "question"}
+          >
             <div className="question-header">
               <div className="arena-label">
                 <span className="live-dot" />
@@ -685,9 +710,7 @@ export default function App() {
                     disabled={loading === "question"}
                   >
                     {loading === "question" ? (
-                      <>
-                        <LoaderCircle className="spin" size={20} /> Preparing…
-                      </>
+                      <GeneratingLabel text="Preparing the next question" />
                     ) : (
                       <>
                         Next Question <ArrowRight size={20} />

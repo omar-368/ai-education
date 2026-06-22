@@ -5,6 +5,7 @@
   color: #242238;
   background: #f6f7fb;
   font-synthesis: none;
+  -webkit-text-size-adjust: 100%;
   --purple: #6657e5;
   --purple-dark: #5142cb;
   --border: #e3e2ec;
@@ -19,6 +20,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
   background:
     radial-gradient(circle at 8% 8%, #ebe8ff 0, transparent 25%),
     radial-gradient(circle at 92% 90%, #e8f3ff 0, transparent 25%),
@@ -31,10 +34,14 @@ input,
 select,
 textarea {
   font: inherit;
+  -webkit-tap-highlight-color: transparent;
 }
 
 button {
   cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 button:disabled {
@@ -53,7 +60,10 @@ textarea:focus-visible {
 .app {
   width: min(100% - 32px, 900px);
   margin: 0 auto;
-  padding: 28px 0 70px;
+  padding:
+    max(28px, env(safe-area-inset-top))
+    0
+    max(70px, calc(env(safe-area-inset-bottom) + 28px));
 }
 
 .brand {
@@ -170,6 +180,7 @@ textarea:focus-visible {
 
 .setup-card,
 .question-card {
+  position: relative;
   width: 100%;
   border: 1px solid var(--border);
   border-radius: 25px;
@@ -177,6 +188,36 @@ textarea:focus-visible {
   box-shadow: 0 22px 65px rgba(51, 45, 102, 0.11);
   overflow: hidden;
   animation: appear 0.35s ease;
+}
+
+.setup-card.is-generating::after,
+.question-card.is-generating::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -45%;
+  z-index: 3;
+  width: 38%;
+  height: 3px;
+  border-radius: 0 0 5px 5px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(141, 122, 244, 0.35),
+    #9a84f2,
+    rgba(244, 180, 102, 0.5),
+    transparent
+  );
+  box-shadow: 0 2px 9px rgba(102, 87, 229, 0.16);
+  animation: generation-glint 2.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes generation-glint {
+  0% { left: -45%; opacity: 0; }
+  12% { opacity: 1; }
+  78% { opacity: 1; }
+  100% { left: 108%; opacity: 0; }
 }
 
 .setup-card {
@@ -474,7 +515,6 @@ textarea:focus {
   transition: 0.2s ease;
 }
 
-.type-options label:hover,
 .type-options label.selected {
   border-color: #8173eb;
   background: #f8f7ff;
@@ -531,9 +571,58 @@ textarea:focus {
   transition: 0.2s ease;
 }
 
-.primary-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 25px #5f4fd44f;
+.generating-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.generating-sparkle {
+  animation: sparkle-breathe 1.65s ease-in-out infinite;
+}
+
+.thinking-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  width: 24px;
+}
+
+.thinking-dots i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: thinking-dot 1.2s ease-in-out infinite;
+}
+
+.thinking-dots i:nth-child(2) {
+  animation-delay: 0.14s;
+}
+
+.thinking-dots i:nth-child(3) {
+  animation-delay: 0.28s;
+}
+
+@keyframes sparkle-breathe {
+  50% {
+    opacity: 0.55;
+    transform: rotate(10deg) scale(0.88);
+  }
+}
+
+@keyframes thinking-dot {
+  0%,
+  65%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  32% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
 }
 
 .start-button {
@@ -721,6 +810,8 @@ textarea:focus {
 }
 
 .answer-options button {
+  width: 100%;
+  min-height: 60px;
   display: flex;
   align-items: center;
   gap: 13px;
@@ -730,6 +821,8 @@ textarea:focus {
   border-radius: 12px;
   background: white;
   text-align: left;
+  line-height: 1.45;
+  touch-action: manipulation;
   transition: 0.18s ease;
   box-shadow: 0 3px 0 #e6e4ed;
 }
@@ -746,7 +839,6 @@ textarea:focus {
   font-weight: 800;
 }
 
-.answer-options button:hover,
 .answer-options button.selected {
   border-color: #8274ec;
   background: #f8f7ff;
@@ -772,6 +864,11 @@ textarea:focus {
 .answer-options button:disabled {
   cursor: default;
   opacity: 1;
+}
+
+.answer-options button:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 #d8d2fa;
 }
 
 textarea {
@@ -1032,8 +1129,11 @@ textarea {
 
 @media (max-width: 580px) {
   .app {
-    width: min(100% - 22px, 900px);
-    padding-top: 18px;
+    width: min(100% - 20px, 900px);
+    padding:
+      max(14px, env(safe-area-inset-top))
+      0
+      max(36px, calc(env(safe-area-inset-bottom) + 20px));
   }
 
   .brand {
@@ -1078,7 +1178,7 @@ textarea {
   }
 
   .question-content {
-    padding: 25px 20px;
+    padding: 25px 16px;
   }
 
   .question-header {
@@ -1101,10 +1201,67 @@ textarea {
     width: 100%;
   }
 
+  select,
+  input,
+  textarea {
+    min-height: 48px;
+    font-size: 16px;
+  }
+
+  .type-options label {
+    min-height: 76px;
+  }
+
+  .primary-button {
+    min-height: 52px;
+  }
+
+  .change-button {
+    min-width: 44px;
+    min-height: 44px;
+    margin: -10px -8px -10px 0;
+  }
+
+  .answer-options {
+    gap: 13px;
+  }
+
+  .answer-options button {
+    min-height: 68px;
+    padding: 16px 14px;
+    font-size: 15px;
+  }
+
+  .answer-options button > span {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    font-size: 13px;
+  }
+
   .achievement-toast {
     right: 12px;
-    bottom: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
     left: 12px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .type-options label:hover {
+    border-color: #8173eb;
+    background: #f8f7ff;
+  }
+
+  .primary-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px #5f4fd44f;
+  }
+
+  .answer-options button:hover:not(:disabled) {
+    border-color: #8274ec;
+    background: #f8f7ff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 #d8d2fa;
   }
 }
 

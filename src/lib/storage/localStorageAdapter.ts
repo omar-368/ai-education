@@ -12,7 +12,7 @@ function localDateKey() {
 }
 
 export const defaultSettings: QuizSettings = {
-  subject: "Veterinary Medicine",
+  subject: "General Veterinary Medicine",
   customSubject: "",
   questionType: "mcq",
 };
@@ -33,9 +33,13 @@ export const localStorageAdapter = {
       const saved = localStorage.getItem(SETTINGS_KEY);
       if (!saved) return defaultSettings;
       const parsed = JSON.parse(saved) as Partial<QuizSettings>;
+      const savedSubject =
+        parsed.subject === "Veterinary Medicine"
+          ? "General Veterinary Medicine"
+          : parsed.subject;
       return {
         subject:
-          typeof parsed.subject === "string" ? parsed.subject : defaultSettings.subject,
+          typeof savedSubject === "string" ? savedSubject : defaultSettings.subject,
         customSubject:
           typeof parsed.customSubject === "string" ? parsed.customSubject : "",
         questionType:
