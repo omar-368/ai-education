@@ -15,7 +15,10 @@ import {
   Zap,
   X,
 } from "lucide-react";
-import { localStorageAdapter } from "./lib/storage/localStorageAdapter";
+import {
+  localDateKey,
+  localStorageAdapter,
+} from "./lib/storage/localStorageAdapter";
 import { subjectGroups } from "./subjects";
 import type { GradeResponse, PlayerProfile, Question, QuizSettings } from "./types";
 
@@ -209,6 +212,7 @@ export default function App() {
 
     startingRef.current = true;
     quizSessionRef.current += 1;
+    const session = quizSessionRef.current;
     questionQueueRef.current = [];
     refillPromiseRef.current = null;
     recentQuestionsRef.current = [];
@@ -222,11 +226,13 @@ export default function App() {
 
     try {
       const questions = await requestQuestionBatch(4);
+      if (quizSessionRef.current !== session) return;
       const firstQuestion = questions.shift();
       if (!firstQuestion) throw new Error("No question was generated.");
       questionQueueRef.current = questions;
       showQuestion(firstQuestion);
     } catch (caught) {
+      if (quizSessionRef.current !== session) return;
       setError(
         caught instanceof Error ? caught.message : "Question generation failed.",
       );
@@ -239,6 +245,7 @@ export default function App() {
   async function showNextQuestion() {
     if (!question || advancingRef.current) return;
     advancingRef.current = true;
+    const session = quizSessionRef.current;
     setLoading("question");
     setError("");
 
@@ -252,13 +259,16 @@ export default function App() {
       }
       if (!nextQuestion) {
         const questions = await requestQuestionBatch(4);
+        if (quizSessionRef.current !== session) return;
         nextQuestion = questions.shift();
         questionQueueRef.current.push(...questions);
       }
+      if (quizSessionRef.current !== session) return;
       if (!nextQuestion) throw new Error("No question was generated.");
       setQuestionNumber((current) => current + 1);
       showQuestion(nextQuestion);
     } catch (caught) {
+      if (quizSessionRef.current !== session) return;
       setError(
         caught instanceof Error ? caught.message : "Question generation failed.",
       );
@@ -277,6 +287,7 @@ export default function App() {
     setResult(null);
     setAnswer("");
     setError("");
+    setLoading("");
     submittingRef.current = false;
     advancingRef.current = false;
     startingRef.current = false;
@@ -293,11 +304,14 @@ export default function App() {
           : 3;
 
     const nextXp = xp + earnedXp;
+    const today = localDateKey();
+    const dailyAnswered =
+      profile.dailyDate === today ? profile.dailyAnswered : 0;
     const newlyUnlocked: string[] = [];
     if (profile.totalAnswered === 0) newlyUnlocked.push("first-step");
     if (nextStreak >= 3 && !profile.achievements.includes("hot-streak")) newlyUnlocked.push("hot-streak");
     if (Math.floor(nextXp / 100) + 1 >= 2 && !profile.achievements.includes("level-two")) newlyUnlocked.push("level-two");
-    if (profile.dailyAnswered + 1 >= 5 && !profile.achievements.includes("daily-five")) newlyUnlocked.push("daily-five");
+    if (dailyAnswered + 1 >= 5 && !profile.achievements.includes("daily-five")) newlyUnlocked.push("daily-five");
 
     setResult(grade);
     setXp(nextXp);
@@ -307,7 +321,9 @@ export default function App() {
       totalAnswered: current.totalAnswered + 1,
       totalCorrect: current.totalCorrect + (isCorrect ? 1 : 0),
       bestStreak: Math.max(current.bestStreak, nextStreak),
-      dailyAnswered: current.dailyAnswered + 1,
+      dailyDate: today,
+      dailyAnswered:
+        (current.dailyDate === today ? current.dailyAnswered : 0) + 1,
       achievements: [...new Set([...current.achievements, ...newlyUnlocked])],
     }));
     if (newlyUnlocked[0]) {
@@ -344,6 +360,7 @@ export default function App() {
 
     setLoading("grade");
     setError("");
+    const session = quizSessionRef.current;
 
     try {
       const grade = await postJson<GradeResponse>("/api/grade-answer", {
@@ -351,8 +368,10 @@ export default function App() {
         question,
         userAnswer: answer,
       });
+      if (quizSessionRef.current !== session) return;
       applyResult(grade);
     } catch (caught) {
+      if (quizSessionRef.current !== session) return;
       submittingRef.current = false;
       setError(
         caught instanceof Error ? caught.message : "Answer grading failed.",
@@ -609,7 +628,8 @@ export default function App() {
                   placeholder="Type your answer here…"
                   rows={5}
                   maxLength={4000}
-                  disabled={!!result}
+                  disabled={!!result || loading === "grade"}
+                  aria-label="Your answer"
                 />
               )}
 
@@ -689,6 +709,8 @@ export default function App() {
                       {result.extraFact}
                     </p>
                   </div>
+
+                  {error && <div className="error-message" role="alert">{error}</div>}
 
                   <button
                     className="primary-button next-button"
