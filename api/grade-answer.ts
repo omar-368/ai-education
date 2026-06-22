@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { askOpenRouter, sendError } from "./_lib/openrouter.js";
 
 const systemPrompt = `You are a strict but constructive university examiner.
-Grade the student's short answer against the question, ideal answer, and supplied study material.
+Grade the student's short answer against the question and ideal answer.
 Reward correct reasoning even if wording differs. Mark partial when core knowledge is present but important
 elements are missing. Keep feedback concise and educational.
 Return ONLY valid JSON:

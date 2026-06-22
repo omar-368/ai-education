@@ -1,12 +1,13 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { askOpenRouter, sendError } from "./_lib/openrouter.js";
 
-const systemPrompt = `You are an expert university examiner and adaptive learning coach.
-Create exactly one difficult, exam-quality question grounded only in the supplied study material.
+const systemPrompt = `You are a knowledgeable teacher and quiz writer.
+Create exactly one clear, accurate question using your own reliable knowledge of the selected subject.
 Use realistic, closely matched distractors. Never make wrong choices silly or obviously false.
-Favor application, analysis, scientific reasoning, and clinical reasoning where relevant.
-Honor the requested difficulty and focus topic. Use recent mistakes and weak topics to adapt.
-If questionType is mixed, choose mcq or short_answer strategically. MCQs must have exactly four options.
+Use an appropriate moderate difficulty and favor understanding over obscure trivia.
+For Veterinary Medicine, medicine, and science subjects, be scientifically accurate and use practical
+or clinical reasoning when useful. MCQs must have exactly four options and one correct answer.
+For short_answer, ask a question that can be answered clearly in a short paragraph.
 Return ONLY a valid JSON object with exactly these fields:
 {
   "questionType": "mcq" | "short_answer",
@@ -24,8 +25,11 @@ Return ONLY a valid JSON object with exactly these fields:
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
   if (request.method !== "POST") return response.status(405).json({ error: "Method not allowed." });
-  if (!request.body?.studyMaterial?.trim()) {
-    return response.status(400).json({ error: "Study material is required." });
+  if (!request.body?.subject?.trim()) {
+    return response.status(400).json({ error: "A subject is required." });
+  }
+  if (!["mcq", "short_answer"].includes(request.body?.questionType)) {
+    return response.status(400).json({ error: "Choose a valid question type." });
   }
 
   try {
@@ -36,6 +40,9 @@ export default async function handler(request: VercelRequest, response: VercelRe
     }
     if (result.questionType === "mcq" && (!Array.isArray(result.options) || result.options.length !== 4)) {
       throw new Error("The generated MCQ did not contain four options. Please try again.");
+    }
+    if (result.questionType === "mcq" && !result.options.includes(result.correctAnswer)) {
+      throw new Error("The generated MCQ did not contain a valid correct answer. Please try again.");
     }
     return response.status(200).json(result);
   } catch (error) {

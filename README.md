@@ -1,63 +1,43 @@
 # AI Education
 
-A polished, adaptive study app that turns pasted notes into unlimited exam-style questions. It tracks difficulty, weak topics, scores, history, and flashcard confidence in the browser while keeping the OpenRouter API key securely in serverless functions.
+A simple AI quiz app. Choose a subject and either MCQ or one-answer questions, then answer an unlimited stream of questions generated through OpenRouter.
 
-## Requirements
-
-- Node.js 20 or newer
-- An [OpenRouter API key](https://openrouter.ai/settings/keys)
-- Vercel CLI for full local API testing (included as a development dependency)
-
-## Install
+## Setup
 
 ```powershell
-cd C:\Users\User\Desktop\Projects\ai-education
 npm install
+Copy-Item .env.example .env.local
 ```
 
-Copy `.env.example` to `.env.local` and replace the placeholder key:
+Add your OpenRouter credentials to `.env.local`:
 
 ```env
 OPENROUTER_API_KEY=sk-or-v1-your-real-key
 OPENROUTER_MODEL=openai/gpt-4o-mini
 ```
 
-Never add `VITE_` to the API key variable. Vite variables are exposed to frontend code. `.env.local` is already ignored by Git.
+Never prefix the API key with `VITE_`. The browser calls serverless routes under `/api`; the key remains on the server.
 
-## Local development
+## Run locally
 
-For frontend-only UI development:
-
-```powershell
-npm run dev
-```
-
-For the complete app, including `/api` serverless functions:
+Use Vercel development mode so both the Vite frontend and serverless API routes run:
 
 ```powershell
-npm run dev:vercel
+npx vercel dev
 ```
 
-The first Vercel CLI run may ask you to sign in and link a local project. The app is normally available at `http://localhost:3000`.
-
-## Production build
+## Build
 
 ```powershell
 npm run build
-npm run preview
 ```
 
-## Deploy to Vercel
+## Deploy
 
-1. Push the `ai-education` folder to a Git repository.
-2. Import the repository in Vercel.
-3. Keep the detected Vite build settings.
-4. Open **Project Settings → Environment Variables**.
-5. Add `OPENROUTER_API_KEY` and `OPENROUTER_MODEL`.
-6. Deploy or redeploy.
+Add `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` in the Vercel project's environment variables, then deploy:
 
-The browser calls only `/api/generate-question`, `/api/grade-answer`, and `/api/explain-simple`. The API key is read from `process.env.OPENROUTER_API_KEY` on the server.
+```powershell
+npx vercel@latest deploy --prod
+```
 
-## Storage
-
-Study material and progress are saved in `localStorage`. A clean placeholder adapter is included for a future Supabase migration; authentication is intentionally not implemented.
+The app saves only the user's selected subject and question type in local storage. No study material or account is required.
