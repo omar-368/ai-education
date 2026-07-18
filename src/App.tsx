@@ -225,11 +225,10 @@ export default function App() {
     setError("");
 
     try {
-      const questions = await requestQuestionBatch(4);
+      const questions = await requestQuestionBatch(1);
       if (quizSessionRef.current !== session) return;
       const firstQuestion = questions.shift();
       if (!firstQuestion) throw new Error("No question was generated.");
-      questionQueueRef.current = questions;
       showQuestion(firstQuestion);
     } catch (caught) {
       if (quizSessionRef.current !== session) return;
@@ -412,161 +411,175 @@ export default function App() {
             className={`setup-card ${loading === "question" ? "is-generating" : ""}`}
             aria-busy={loading === "question"}
           >
-            <div className="player-dashboard">
-              <div className="player-rank">
-                <span><Crown size={22} /></span>
-                <div><small>YOUR RANK</small><strong>{rank}</strong></div>
+            <section className="setup-intro" aria-labelledby="setup-title">
+              <div className="player-dashboard">
+                <div className="player-rank">
+                  <span><Crown size={22} /></span>
+                  <div><small>Your rank</small><strong>{rank}</strong></div>
+                </div>
+                <div className="player-level">
+                  <div><span>Level {level}</span><strong>{xp} XP</strong></div>
+                  <div className="player-progress"><i style={{ width: `${levelProgress}%` }} /></div>
+                  <small>{100 - levelProgress} XP to next level</small>
+                </div>
               </div>
-              <div className="player-level">
-                <div><span>Level {level}</span><strong>{xp} XP</strong></div>
-                <div className="player-progress"><i style={{ width: `${levelProgress}%` }} /></div>
-                <small>{100 - levelProgress} XP to next level</small>
+
+              <div className="setup-copy">
+                <span className="intro-icon">
+                  <Sparkles size={28} />
+                </span>
+                <p className="eyebrow">AI-powered study</p>
+                <h1 id="setup-title">What do you want to learn?</h1>
+                <p className="subtitle">
+                  Build momentum with focused questions, instant feedback, and a
+                  clear view of your progress.
+                </p>
               </div>
-            </div>
-            <span className="intro-icon">
-              <Sparkles size={28} />
-            </span>
-            <p className="eyebrow">AI-POWERED QUIZ</p>
-            <h1>What do you want to learn?</h1>
-            <p className="subtitle">
-              Pick your arena, answer questions, and level up.
-            </p>
 
-            <div className="game-preview">
-              <div><span><Zap size={18} /></span><strong>Earn XP</strong><small>with every answer</small></div>
-              <div><span><Flame size={18} /></span><strong>Build streaks</strong><small>stay on a roll</small></div>
-              <div><span><Trophy size={18} /></span><strong>Level up</strong><small>master your subject</small></div>
-            </div>
-
-            <div className="daily-quest">
-              <span className="quest-icon"><Trophy size={21} /></span>
-              <div>
-                <div className="quest-title"><strong>Daily quest</strong><span>{dailyProgress}/5</span></div>
-                <p>Answer 5 questions today</p>
-                <div className="quest-track"><i style={{ width: `${dailyProgress * 20}%` }} /></div>
+              <div className="game-preview">
+                <div><span><Zap size={18} /></span><strong>Earn XP</strong><small>with every answer</small></div>
+                <div><span><Flame size={18} /></span><strong>Build streaks</strong><small>stay on a roll</small></div>
+                <div><span><Trophy size={18} /></span><strong>Level up</strong><small>master your subject</small></div>
               </div>
-            </div>
 
-            <div className="field">
-              <label htmlFor="subject">Subject</label>
-              <select
-                id="subject"
-                value={settings.subject}
-                disabled={loading === "question"}
-                onChange={(event) =>
-                  updateSettings({ subject: event.target.value })
-                }
-              >
-                {subjectGroups.map((group) => (
-                  <optgroup key={group.label} label={group.label}>
-                    {group.subjects.map((subject) => (
-                      <option key={subject} value={subject}>
-                        {subject}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-            </div>
+              <div className="daily-quest">
+                <span className="quest-icon"><Trophy size={21} /></span>
+                <div>
+                  <div className="quest-title"><strong>Daily quest</strong><span>{dailyProgress}/5</span></div>
+                  <p>Answer 5 questions today</p>
+                  <div className="quest-track"><i style={{ width: `${dailyProgress * 20}%` }} /></div>
+                </div>
+              </div>
+            </section>
 
-            {settings.subject === "Custom Subject" && (
-              <div className="field custom-field">
-                <label htmlFor="custom-subject">Enter subject</label>
-                <input
-                  id="custom-subject"
-                  value={settings.customSubject}
-                  maxLength={100}
+            <section className="setup-form-panel" aria-labelledby="session-settings-title">
+              <div className="form-heading">
+                <p className="eyebrow">Your session</p>
+                <h2 id="session-settings-title">Choose a study format</h2>
+                <p>Set the topic and answer style. You can change them anytime.</p>
+              </div>
+
+              <div className="field">
+                <label htmlFor="subject">Subject</label>
+                <select
+                  id="subject"
+                  value={settings.subject}
                   disabled={loading === "question"}
                   onChange={(event) =>
-                    updateSettings({ customSubject: event.target.value })
+                    updateSettings({ subject: event.target.value })
                   }
-                  placeholder="e.g. Astronomy"
-                  autoFocus
-                />
+                >
+                  {subjectGroups.map((group) => (
+                    <optgroup key={group.label} label={group.label}>
+                      {group.subjects.map((subject) => (
+                        <option key={subject} value={subject}>
+                          {subject}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
               </div>
-            )}
 
-            <fieldset className="field">
-              <legend>Question type</legend>
-              <div className="type-options">
-                <label
-                  className={
-                    settings.questionType === "mcq" ? "selected" : ""
-                  }
-                >
+              {settings.subject === "Custom Subject" && (
+                <div className="field custom-field">
+                  <label htmlFor="custom-subject">Enter subject</label>
                   <input
-                    type="radio"
-                    name="question-type"
-                    value="mcq"
-                    checked={settings.questionType === "mcq"}
+                    id="custom-subject"
+                    value={settings.customSubject}
+                    maxLength={100}
                     disabled={loading === "question"}
-                    onChange={() => updateSettings({ questionType: "mcq" })}
-                  />
-                  <span className="radio-mark" />
-                  <span>
-                    <strong>MCQ</strong>
-                    <small>Choose from four answers</small>
-                  </span>
-                </label>
-                <label
-                  className={
-                    settings.questionType === "short_answer" ? "selected" : ""
-                  }
-                >
-                  <input
-                    type="radio"
-                    name="question-type"
-                    value="short_answer"
-                    checked={settings.questionType === "short_answer"}
-                    disabled={loading === "question"}
-                    onChange={() =>
-                      updateSettings({ questionType: "short_answer" })
+                    onChange={(event) =>
+                      updateSettings({ customSubject: event.target.value })
                     }
+                    placeholder="e.g. Astronomy"
+                    autoFocus
                   />
-                  <span className="radio-mark" />
-                  <span>
-                    <strong>One answer question</strong>
-                    <small>Write your own answer</small>
-                  </span>
-                </label>
-              </div>
-            </fieldset>
-
-            {error && <div className="error-message" role="alert">{error}</div>}
-
-            <button
-              className="primary-button start-button"
-              onClick={() => void startQuiz()}
-              disabled={loading === "question"}
-            >
-              {loading === "question" ? (
-                <GeneratingLabel text="Creating your questions" />
-              ) : (
-                <>
-                  Start Quiz <ArrowRight size={20} />
-                </>
+                </div>
               )}
-            </button>
 
-            <div className="achievement-row">
-              {achievements.map((achievement) => {
-                const unlocked = profile.achievements.includes(achievement.id);
-                return (
-                  <div
-                    key={achievement.id}
-                    className={unlocked ? "unlocked" : ""}
-                    title={`${achievement.label}: ${achievement.detail}`}
-                    role="img"
-                    aria-label={`${achievement.label}: ${achievement.detail}. ${
-                      unlocked ? "Unlocked" : "Locked"
-                    }`}
+              <fieldset className="field">
+                <legend>Question type</legend>
+                <div className="type-options">
+                  <label
+                    className={
+                      settings.questionType === "mcq" ? "selected" : ""
+                    }
                   >
-                    <span>{achievement.icon}</span>
-                  </div>
-                );
-              })}
-              <small>{profile.achievements.length}/{achievements.length} achievements</small>
-            </div>
+                    <input
+                      type="radio"
+                      name="question-type"
+                      value="mcq"
+                      checked={settings.questionType === "mcq"}
+                      disabled={loading === "question"}
+                      onChange={() => updateSettings({ questionType: "mcq" })}
+                    />
+                    <span className="radio-mark" />
+                    <span>
+                      <strong>Multiple choice</strong>
+                      <small>Choose from four answers</small>
+                    </span>
+                  </label>
+                  <label
+                    className={
+                      settings.questionType === "short_answer" ? "selected" : ""
+                    }
+                  >
+                    <input
+                      type="radio"
+                      name="question-type"
+                      value="short_answer"
+                      checked={settings.questionType === "short_answer"}
+                      disabled={loading === "question"}
+                      onChange={() =>
+                        updateSettings({ questionType: "short_answer" })
+                      }
+                    />
+                    <span className="radio-mark" />
+                    <span>
+                      <strong>Written answer</strong>
+                      <small>Explain it in your own words</small>
+                    </span>
+                  </label>
+                </div>
+              </fieldset>
+
+              {error && <div className="error-message" role="alert">{error}</div>}
+
+              <button
+                className="primary-button start-button"
+                onClick={() => void startQuiz()}
+                disabled={loading === "question"}
+              >
+                {loading === "question" ? (
+                  <GeneratingLabel text="Creating your questions" />
+                ) : (
+                  <>
+                    Start quiz <ArrowRight size={20} />
+                  </>
+                )}
+              </button>
+
+              <div className="achievement-row">
+                {achievements.map((achievement) => {
+                  const unlocked = profile.achievements.includes(achievement.id);
+                  return (
+                    <div
+                      key={achievement.id}
+                      className={unlocked ? "unlocked" : ""}
+                      title={`${achievement.label}: ${achievement.detail}`}
+                      role="img"
+                      aria-label={`${achievement.label}: ${achievement.detail}. ${
+                        unlocked ? "Unlocked" : "Locked"
+                      }`}
+                    >
+                      <span>{achievement.icon}</span>
+                    </div>
+                  );
+                })}
+                <small>{profile.achievements.length}/{achievements.length} achievements</small>
+              </div>
+            </section>
           </div>
         ) : (
           <div
@@ -576,7 +589,7 @@ export default function App() {
             <div className="question-header">
               <div className="arena-label">
                 <span className="live-dot" />
-                <div><small>QUIZ ARENA</small><strong>{selectedSubject}</strong></div>
+                <div><small>Quiz session</small><strong>{selectedSubject}</strong></div>
               </div>
               <div className="session-hud">
                 <span className="hud-streak"><Flame size={16} /> {streak}</span>
@@ -742,7 +755,7 @@ export default function App() {
       {achievementToast && (
         <div className="achievement-toast" role="status" aria-live="polite">
           <span><Award size={23} /></span>
-          <div><small>ACHIEVEMENT UNLOCKED</small><strong>{achievementToast}</strong></div>
+          <div><small>Achievement unlocked</small><strong>{achievementToast}</strong></div>
         </div>
       )}
     </main>

@@ -1,4 +1,4 @@
-import { askOpenRouter, sendError } from "./_lib/openrouter.js";
+import { askOpenAI, sendError } from "./_lib/openai.js";
 import {
   cleanText,
   prepareApiRequest,
@@ -65,11 +65,15 @@ export default async function handler(request: ApiRequest, response: ApiResponse
     return response.status(400).json({ error: "The question data is incomplete." });
   }
   try {
-    const result = await askOpenRouter(systemPrompt, {
-      subject,
-      question,
-      userAnswer,
-    });
+    const result = await askOpenAI(
+      systemPrompt,
+      {
+        subject,
+        question,
+        userAnswer,
+      },
+      { maxTokens: 1_500 },
+    );
     if (!result || typeof result !== "object") {
       throw new Error("The grading response was incomplete. Please submit again.");
     }

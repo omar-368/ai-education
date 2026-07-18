@@ -1,4 +1,4 @@
-import { askOpenRouter, sendError } from "./_lib/openrouter.js";
+import { askOpenAI, sendError } from "./_lib/openai.js";
 import {
   cleanText,
   prepareApiRequest,
@@ -98,13 +98,19 @@ export default async function handler(request: ApiRequest, response: ApiResponse
   }
 
   try {
-    const result = await askOpenRouter(systemPrompt, {
-      subject,
-      questionType,
-      difficulty: "Exam",
-      count,
-      previousQuestions,
-    });
+    const result = await askOpenAI(
+      systemPrompt,
+      {
+        subject,
+        questionType,
+        difficulty: "Exam",
+        count,
+        previousQuestions,
+      },
+      {
+        maxTokens: Math.min(3_000, 700 + count * 550),
+      },
+    );
     if (!result || typeof result !== "object" || !Array.isArray(result.questions)) {
       throw new Error("The AI did not generate a usable question. Please try again.");
     }

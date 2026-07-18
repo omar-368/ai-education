@@ -1,6 +1,6 @@
 # AI Education
 
-A simple AI quiz app. Choose a subject and either MCQ or one-answer questions, then answer an unlimited stream of questions generated through OpenRouter.
+A simple AI quiz app. Choose a subject and either MCQ or one-answer questions, then answer an unlimited stream of questions generated through OpenAI.
 
 ## Setup
 
@@ -9,14 +9,15 @@ npm install
 Copy-Item .env.example .env.local
 ```
 
-Add your OpenRouter credentials to `.env.local`:
+Add your OpenAI credentials to `.env.local`:
 
 ```env
-OPENROUTER_API_KEY=sk-or-v1-your-real-key
-OPENROUTER_MODEL=openrouter/free
+OPENAI_API_KEY=sk-proj-your-real-key
+OPENAI_MODEL=gpt-5-mini
 ```
 
 Never prefix the API key with `VITE_`. The browser calls serverless routes under `/api`; the key remains on the server.
+`OPENAI_MODEL` is optional and defaults to `gpt-5-mini`, a fast, cost-efficient model.
 
 ## Run locally
 
@@ -36,7 +37,7 @@ npm audit
 
 ## Deploy
 
-Add `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` in the Vercel project's environment variables, then deploy:
+Add `OPENAI_API_KEY` and (optionally) `OPENAI_MODEL` in the Vercel project's environment variables, then deploy:
 
 ```powershell
 npx vercel@latest deploy --prod
