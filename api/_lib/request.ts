@@ -26,6 +26,18 @@ export function prepareApiRequest(
     return false;
   }
 
+  const contentTypeHeader = request.headers["content-type"];
+  const contentType = Array.isArray(contentTypeHeader)
+    ? contentTypeHeader[0]
+    : contentTypeHeader;
+  if (
+    typeof contentType !== "string" ||
+    !contentType.toLowerCase().startsWith("application/json")
+  ) {
+    response.status(415).json({ error: "Content-Type must be application/json." });
+    return false;
+  }
+
   const contentLength = Number(request.headers["content-length"] || 0);
   if (contentLength > 30_000) {
     response.status(413).json({ error: "Request is too large." });

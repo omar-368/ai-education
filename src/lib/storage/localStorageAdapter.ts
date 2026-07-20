@@ -4,7 +4,7 @@ import { subjects } from "../../subjects";
 const SETTINGS_KEY = "ai-education-quiz-settings";
 const PROFILE_KEY = "ai-education-player-profile";
 
-function localDateKey() {
+export function localDateKey() {
   const date = new Date();
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -66,19 +66,31 @@ export const localStorageAdapter = {
       const saved = localStorage.getItem(PROFILE_KEY);
       if (!saved) return defaultProfile;
       const parsed = JSON.parse(saved) as Partial<PlayerProfile>;
+      const totalAnswered = Number.isFinite(parsed.totalAnswered)
+        ? Math.max(0, Math.floor(Number(parsed.totalAnswered)))
+        : 0;
       const profile: PlayerProfile = {
-        totalXp: Number.isFinite(parsed.totalXp) ? Math.max(0, Number(parsed.totalXp)) : 0,
-        totalAnswered: Number.isFinite(parsed.totalAnswered)
-          ? Math.max(0, Number(parsed.totalAnswered))
+        totalXp: Number.isFinite(parsed.totalXp)
+          ? Math.max(0, Math.floor(Number(parsed.totalXp)))
           : 0,
+        totalAnswered,
         totalCorrect: Number.isFinite(parsed.totalCorrect)
-          ? Math.max(0, Number(parsed.totalCorrect))
+          ? Math.min(
+              totalAnswered,
+              Math.max(0, Math.floor(Number(parsed.totalCorrect))),
+            )
           : 0,
         bestStreak: Number.isFinite(parsed.bestStreak)
-          ? Math.max(0, Number(parsed.bestStreak))
+          ? Math.min(
+              totalAnswered,
+              Math.max(0, Math.floor(Number(parsed.bestStreak))),
+            )
           : 0,
         dailyAnswered: Number.isFinite(parsed.dailyAnswered)
-          ? Math.max(0, Number(parsed.dailyAnswered))
+          ? Math.min(
+              totalAnswered,
+              Math.max(0, Math.floor(Number(parsed.dailyAnswered))),
+            )
           : 0,
         dailyDate: typeof parsed.dailyDate === "string" ? parsed.dailyDate : localDateKey(),
         achievements: Array.isArray(parsed.achievements)
